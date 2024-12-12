@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Given a prompt, StrandHead generates a high-quality 3D head avatar with strand-level textured hair, enabling strand-based rendering and simulation.">
+  <meta name="keywords" content="3DAIGC, Text-to-Head, Text-to-Hair, 3D Disentangled Head Generation, 3D Hair Generation">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.1.1/model-viewer.min.js"></script>
+  <title>StrandHead: Text to Strand-Disentangled 3D Head Avatars Using Hair Geometric Priors</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/nju.png">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<!-- <nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://keunhong.com">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="https://hypernerf.github.io">
+            HyperNeRF
+          </a>
+          <a class="navbar-item" href="https://nerfies.github.io">
+            Nerfies
+          </a>
+          <a class="navbar-item" href="https://latentfusion.github.io">
+            LatentFusion
+          </a>
+          <a class="navbar-item" href="https://photoshape.github.io">
+            PhotoShape
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav> -->
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">StrandHead: Text to Strand-Disentangled 3D Head Avatars Using Hair Geometric Priors</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://xiaokunsun.github.io">Xiaokun Sun</a><sup>1</sup>, </span>
+            <span class="author-block">
+                Zeyu Cai<sup>2</sup>, </span>
+            <span class="author-block">
+              <a href="https://jessezhang92.github.io">Zhenyu Zhang</a><sup>1*</sup>, </span>
+            <span class="author-block">
+              <a href="https://tyshiwo.github.io/index.html">Ying Tai</a><sup>1</sup>, </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com.hk/citations?user=6CIDtZQAAAAJ">Jian Yang</a><sup>1</sup>
+            </span>
+          </div>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Nanjing University</span>
+            <span class="author-block"><sup>2</sup>The Hong Kong University of Science and Technology (Guangzhou)</span>
+          </div>
+
+          <div class="is-size-6 publication-authors">
+            <span class="author-block"><sup>*</sup>Corresponding author</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="https://xiaokunsun.github.io/StrandHead.github.io"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>ArXiv</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://github.com/XiaokunSun/StrandHead"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+              <span class="link-block">
+                <a href="https://drive.google.com/drive/folders/1Ve2vVVilzI-2TYNB9wQrLgG53L2PjFBM?usp=sharing"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fas fa-cubes"></i>
+                  </span>
+                  <span>Gallery</span>
+                  </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <img id="teaser" src="./static/images/teaser.png" alt="Teaser Image" style="width: 100%; height: auto;">
+      <h2 class="subtitle has-text-justified">
+        We propose <b>StrandHead</b>, a text-driven framework for generating <b>strand-disentangled</b> 3D head avatars that feature high-fidelity facial details and strand-based hair. By accurately capturing the <b>internal geometry</b> of hair strands, our approach seamlessly supports flexible <b>hairstyle transfer and editing</b>, as well as <b>physics-based rendering and simulation</b>.
+      </h2>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Results Overview</h2>
+        <video poster="" id="teaser" autoplay controls muted loop playsinline height="100%">
+          <source src="./static/videos/teaser.mp4"
+                  type="video/mp4">
+        </video>
+        <h2 class="title is-3">Strand-Disentangled Head Avatar Gallery</h2>
+        <h2 class="title is-3">(Celebrity Examples)</h2>
+        <div id="results-carousel" class="carousel results-carousel">
+          <div class="item item-cele_case_0">
+            <video poster="" id="cele_case_0" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_0.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_1">
+            <video poster="" id="cele_case_1" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_1.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_2">
+            <video poster="" id="cele_case_2" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_2.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_3">
+            <video poster="" id="cele_case_3" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_3.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_4">
+            <video poster="" id="cele_case_4" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_4.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_5">
+            <video poster="" id="cele_case_5" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_5.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_6">
+            <video poster="" id="cele_case_6" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_6.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_7">
+            <video poster="" id="cele_case_7" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_7.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_8">
+            <video poster="" id="cele_case_8" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_8.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_9">
+            <video poster="" id="cele_case_9" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_9.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_10">
+            <video poster="" id="cele_case_10" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_10.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_11">
+            <video poster="" id="cele_case_11" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_11.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_12">
+            <video poster="" id="cele_case_12" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_12.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-cele_case_13">
+            <video poster="" id="cele_case_13" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/cele_case_13.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <h2 class="title is-3">(Ordinary People Examples)</h2>
+        <div id="results-carousel" class="carousel results-carousel">
+          <div class="item item-ord_case_0">
+            <video poster="" id="ord_case_0" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_0.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_1">
+            <video poster="" id="ord_case_1" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_1.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_2">
+            <video poster="" id="ord_case_2" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_2.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_3">
+            <video poster="" id="ord_case_3" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_3.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_4">
+            <video poster="" id="ord_case_4" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_4.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_5">
+            <video poster="" id="ord_case_5" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_5.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_6">
+            <video poster="" id="ord_case_6" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_6.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_7">
+            <video poster="" id="ord_case_7" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_7.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_8">
+            <video poster="" id="ord_case_8" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_8.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_9">
+            <video poster="" id="ord_case_9" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_9.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_10">
+            <video poster="" id="ord_case_10" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_10.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_11">
+            <video poster="" id="ord_case_11" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_11.mp4"
+                      type="video/mp4">
+            </video>
+          </div>          
+          <div class="item item-ord_case_12">
+            <video poster="" id="ord_case_12" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_12.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_13">
+            <video poster="" id="ord_case_13" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_13.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_14">
+            <video poster="" id="ord_case_14" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_14.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_15">
+            <video poster="" id="ord_case_15" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_15.mp4"
+                      type="video/mp4">
+            </video>
+          </div>          
+          <div class="item item-ord_case_16">
+            <video poster="" id="ord_case_16" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_16.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_17">
+            <video poster="" id="ord_case_17" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_17.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_18">
+            <video poster="" id="ord_case_18" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_18.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_19">
+            <video poster="" id="ord_case_19" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_19.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_20">
+            <video poster="" id="ord_case_20" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_20.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_21">
+            <video poster="" id="ord_case_21" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_21.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_22">
+            <video poster="" id="ord_case_22" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_22.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_23">
+            <video poster="" id="ord_case_23" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_23.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_24">
+            <video poster="" id="ord_case_24" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_24.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_25">
+            <video poster="" id="ord_case_25" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_25.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-ord_case_26">
+            <video poster="" id="ord_case_26" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/ord_case_26.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <h2 class="subtitle has-text-centered">
+          Video results are loading slowly, please be patient.
+        </h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Abstract</h2>
+        <h2 class="subtitle has-text-justified">
+          While haircut indicates distinct personality, existing avatar generation methods fail to model practical hair due to the general or entangled representation. We propose StrandHead, a novel text to 3D head avatar generation method capable of generating disentangled 3D hair with strand representation. Without using 3D data for supervision, we demonstrate that realistic hair strands can be generated from prompts by distilling 2D generative diffusion models. To this end, we propose a series of reliable priors on shape initialization, geometric primitives, and statistical haircut features, leading to a stable optimization and text-aligned performance. Extensive experiments show that StrandHead achieves the state-of-the-art reality and diversity of generated 3D head and hair. The generated 3D hair can also be easily implemented in the Unreal Engine for physical simulation and other applications. The code will be released for research purposes.
+        </h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Method Highlights</h2>
+        <div class="has-text-centered">
+          <img src="./static/images/highlights.png" alt="pipeline" style="max-width: 100%; height: auto;">
+        </div>
+        <h2 class="subtitle has-text-justified">
+          Compared to previous methods, StrandHead generate 3D heads with fine geometry and lifelike textures, as well as realistic textured strand-based hairstyles, and the entire framework does not require any hair training data.
+        </h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Methodology</h2>
+        <div class="has-text-centered">
+          <img src="./static/images/pipeline.png" alt="pipeline" style="max-width: 100%; height: auto;">
+        </div>
+        <h2 class="subtitle has-text-justified">
+          Strandhead consists of two stages: <b>(a)</b> Under the constraints of the human-specific diffusion model and the FLAME-volving prior loss, StrandHead generates a detailed and reasonable bald head. <b>(b)</b> By introducing a differentiable prismatization algorithm, orientation consistency loss and curvature regularization loss inspired by hair geometric priors, StrandHead achieves diverse and realistic strand-accurate hair creation without any requiring hair training data.
+        </h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Comparisons with Text-to-Head Methods</h2>
+        <div id="results-carousel" class="carousel results-carousel">
+          <div class="item item-comp_head_0">
+            <video poster="" id="comp_head_0" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/comp_head_0.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-comp_head_1">
+            <video poster="" id="comp_head_1" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/comp_head_1.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-comp_head_2">
+            <video poster="" id="comp_head_2" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/comp_head_2.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-comp_head_3">
+            <video poster="" id="comp_head_3" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/comp_head_3.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Comparisons with Text-to-Hair Methods</h2>
+        <div id="results-carousel" class="carousel results-carousel">
+          <div class="item item-comp_hair_0">
+            <video poster="" id="comp_hair_0" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/comp_hair_0.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-comp_hair_1">
+            <video poster="" id="comp_hair_1" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/comp_hair_1.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-comp_hair_2">
+            <video poster="" id="comp_hair_2" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/comp_hair_2.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-comp_hair_3">
+            <video poster="" id="comp_hair_3" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/comp_hair_3.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Haircut Transfer</h2>
+        <div id="results-carousel" class="carousel results-carousel">
+          <div class="item item-hair_transfer_0">
+            <video poster="" id="hair_transfer_0" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/hair_transfer_0.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-hair_transfer_1">
+            <video poster="" id="hair_transfer_1" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/hair_transfer_1.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-hair_transfer_2">
+            <video poster="" id="hair_transfer_2" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/hair_transfer_2.mp4"
+                      type="video/mp4">
+            </video>
+          </div>          
+          <div class="item item-hair_transfer_3">
+            <video poster="" id="hair_transfer_3" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/hair_transfer_3.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Haircut Editing</h2>
+        <div id="results-carousel" class="carousel results-carousel">
+          <div class="item item-hair_editing_0">
+            <video poster="" id="hair_editing_0" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/hair_editing_0.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-hair_editing_1">
+            <video poster="" id="hair_editing_1" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/hair_editing_1.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-hair_editing_2">
+            <video poster="" id="hair_editing_2" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/hair_editing_2.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-hair_editing_3">
+            <video poster="" id="hair_editing_3" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/hair_editing_3.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Physics-Based Rendering and Simulation</h2>
+        <div id="results-carousel" class="carousel results-carousel">
+          <div class="item item-sim_0">
+            <video poster="" id="sim_0" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/sim_0.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-sim_1">
+            <video poster="" id="sim_1" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/sim_1.mp4"
+                      type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- <section class="section">
+  <div class="container is-max-desktop has-text-centered">
+    <p class="title is-3 has-text-centered"> Exported Meshes </p>
+    <div class="level">
+      <div class="level-item">
+        <model-viewer src="./static/meshes/anya.glb" poster="./static/meshes/anya.jpg" style="width: 100%; height: 300px;" auto-rotate shadow-intensity="1" camera-controls touch-action="pan-y"></model-viewer>
+      </div>
+      <div class="level-item">
+        <model-viewer src="./static/meshes/luigi.glb" poster="./static/meshes/luigi.jpg" style="width: 100%; height: 300px;" auto-rotate shadow-intensity="1" camera-controls touch-action="pan-y"></model-viewer>
+      </div>
+      <div class="level-item">
+        <model-viewer src="./static/meshes/1.glb" style="width: 100%; height: 300px;" auto-rotate shadow-intensity="1" camera-controls touch-action="pan-y"></model-viewer>
+      </div>
+    </div>
+  </div>
+</section> -->
+
+
+<!-- <section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{park2021nerfies,
+  author    = {Park, Keunhong and Sinha, Utkarsh and Barron, Jonathan T. and Bouaziz, Sofien and Goldman, Dan B and Seitz, Steven M. and Martin-Brualla, Ricardo},
+  title     = {Nerfies: Deformable Neural Radiance Fields},
+  journal   = {ICCV},
+  year      = {2021},
+}</code></pre>
+  </div>
+</section> -->
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{sun2024strandhead,
+  title={StrandHead: Text to Strand-Disentangled 3D Head Avatars Using Hair Geometric Priors},
+  author={Sun, Xiaokun and Cai, Zeyu and Zhang, Zhenyu and Tai, Ying and Yang, Jian},
+  journal={arXiv preprint arXiv:XXXX.XXXXX},
+  year={2024}
+}</code></pre>
+  </div>
+</section>
+  
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            The website template was borrowed from <a href="https://github.com/nerfies/nerfies.github.io"> Nerfies </a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
